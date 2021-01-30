@@ -1,0 +1,113 @@
+description: A highly-available, production-grade Kubernetes cluster.
+series: focal
+machines:
+  0:
+    constraints: cores=2 mem=3G root-disk=64G
+  1:
+    constraints: cores=2 mem=3G root-disk=64G
+  2:
+    constraints: cores=2 mem=3G root-disk=64G
+services:
+  containerd:
+    annotations:
+      gui-x: "475"
+      gui-y: "800"
+    charm: cs:~containers/containerd-97
+    resources: {}
+  easyrsa:
+    annotations:
+      gui-x: "90"
+      gui-y: "420"
+    charm: cs:~containers/easyrsa-339
+    num_units: 1
+    resources:
+      easyrsa: 2
+    to:
+      - lxd:kubernetes-worker/0
+  etcd:
+    annotations:
+      gui-x: "800"
+      gui-y: "420"
+    charm: cs:~containers/etcd-544
+    options:
+      channel: 3.4/stable
+    num_units: 3
+    resources:
+      core: 0
+      etcd: 2
+      snapshot: 0
+    to:
+      - lxd:kubernetes-worker/0
+      - lxd:kubernetes-worker/1
+      - lxd:kubernetes-worker/2
+  flannel:
+    annotations:
+      gui-x: "475"
+      gui-y: "605"
+    charm: cs:~containers/flannel-513
+    resources:
+      flannel-amd64: 652
+      flannel-arm64: 649
+      flannel-s390x: 636
+  kubernetes-master:
+    annotations:
+      gui-x: "800"
+      gui-y: "850"
+    charm: cs:~containers/kubernetes-master-912
+    num_units: 1
+    options:
+      channel: 1.19/stable
+    resources:
+      cdk-addons: 0
+      core: 0
+      kube-apiserver: 0
+      kube-controller-manager: 0
+      kube-proxy: 0
+      kube-scheduler: 0
+      kubectl: 0
+    to:
+      - lxd:kubernetes-worker/0
+  kubernetes-worker:
+    annotations:
+      gui-x: "90"
+      gui-y: "850"
+    charm: cs:~containers/kubernetes-worker-713
+    expose: true
+    num_units: 3
+    options:
+      channel: 1.19/stable
+    resources:
+      cni-amd64: 685
+      cni-arm64: 676
+      cni-s390x: 688
+      core: 0
+      kube-proxy: 0
+      kubectl: 0
+      kubelet: 0
+    to:
+      - 0
+      - 1
+      - 2
+relations:
+  - - kubernetes-master:kube-api-endpoint
+    - kubernetes-worker:kube-api-endpoint
+  - - kubernetes-master:kube-control
+    - kubernetes-worker:kube-control
+  - - kubernetes-master:certificates
+    - easyrsa:client
+  - - etcd:certificates
+    - easyrsa:client
+  - - kubernetes-master:etcd
+    - etcd:db
+  - - kubernetes-worker:certificates
+    - easyrsa:client
+  - - flannel:etcd
+    - etcd:db
+  - - flannel:cni
+    - kubernetes-master:cni
+  - - flannel:cni
+    - kubernetes-worker:cni
+  - - containerd:containerd
+    - kubernetes-worker:container-runtime
+  - - containerd:containerd
+    - kubernetes-master:container-runtime
