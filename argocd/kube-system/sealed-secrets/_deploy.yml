@@ -3,21 +3,20 @@ kind: Application
 metadata:
   name: sealed-secrets
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: home
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
   source:
     repoURL: https://bitnami-labs.github.io/sealed-secrets
     targetRevision: 1.13.2
     path: argocd/kube-system/sealed-secrets
     chart: sealed-secrets
-    helm:
-      parameters:
-        - name: NAMESPACE
-          value: sealed-secrets
+    namespace: sealed-secrets
 
   destination:
     server: https://kubernetes.default.svc
     namespace: sealed-secrets
-  syncPolicy:
-    syncoptions:
-      - CreateNamespace=true
