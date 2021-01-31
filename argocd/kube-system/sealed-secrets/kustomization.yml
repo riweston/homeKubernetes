@@ -3,8 +3,3 @@ kind: Kustomization
 
 bases:
   - _deploy.yml
-
-namespace: sealed-secrets
-
-resources:
-  - ../../../common/
