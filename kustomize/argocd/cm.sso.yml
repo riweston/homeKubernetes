@@ -1,0 +1,12 @@
+connectors:
+  - type: github
+    id: github
+    name: GitHub
+    config:
+      clientID: $dex.github.clientId
+      clientSecret: $dex.github.clientSecret
+    orgs:
+      - name: org-riweston
+        teams:
+          - admins
+          - readonly

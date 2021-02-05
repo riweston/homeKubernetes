@@ -1,0 +1,39 @@
+bases:
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v1.8.3/manifests/install.yaml
+
+resources:
+  - resource.ingress.yml
+  - resource.namespace.yml
+  - resource.project.yml
+  - resource.secrets.yml
+  - app.yml
+
+commonLabels:
+  deployed-by: argocd
+
+configMapGenerator:
+  - name: argocd-cm
+    behavior: replace
+    files:
+      - repositories=cm.repos.yml
+      - dex.config=cm.sso.yml
+    literals:
+      - url=https://argocd.riweston.io
+      - admin.enabled=false
+  - name: argocd-rbac-cm
+    behavior: replace
+    files:
+      - policy.csv=cm.rbac.yml
+    literals:
+      - policy.default=role:deny
+      - users.anonymous.enabled=false
+      - scopes='[email,groups]'
+
+patches:
+  - target:
+      kind: Secret
+      name: argocd-secret
+    path: overlay.secrets.yml
+
+patchesStrategicMerge:
+  - overlay.argocd.yml

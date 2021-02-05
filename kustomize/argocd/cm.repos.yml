@@ -1,0 +1,3 @@
+- url: https://github.com/riweston/homeKubernetes.git
+  type: git
+  name: homeKubernetes
