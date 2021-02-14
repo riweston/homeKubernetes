@@ -20,6 +20,7 @@ configMapGenerator:
     literals:
       - url=https://argocd.riweston.io
       - admin.enabled=false
+      - kustomize.buildOptions='--load_restrictor=none'
   - name: argocd-rbac-cm
     behavior: replace
     files:

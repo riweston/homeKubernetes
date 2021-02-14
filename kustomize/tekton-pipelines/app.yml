@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tekton-pipelines
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: home
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  source:
+    repoURL: https://github.com/riweston/homeKubernetes.git
+    targetRevision: dev
+    path: kustomize/tekton-pipelines
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tekton-pipelines
